@@ -7,7 +7,7 @@ This is a [slim/twig-view](https://github.com/slimphp/Twig-View) component, but 
 Via [Composer](https://getcomposer.org/)
 
 ```bash
-$ composer require Onethity/slim4-twig-view
+$ composer require onethity/slim4-twig-view
 ```
 
 Requires Slim Framework 4 and PHP 7.1.0 or newer.

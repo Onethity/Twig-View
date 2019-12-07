@@ -1,5 +1,5 @@
 {
-    "name": "Onethity/slim4-twig-view",
+    "name": "onethity/slim4-twig-view",
     "type": "library",
     "description": "Slim Framework 4 twig view forked.",
     "keywords": ["slim","framework","view","template","twig", "slim4"],
