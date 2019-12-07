@@ -2,7 +2,7 @@
 /**
  * Slim Framework (http://slimframework.com)
  *
- * @link      https://github.com/slimphp/Twig-View
+ * @link      https://github.com/Onethity/Twig-View
  * @copyright Copyright (c) 2011-2015 Josh Lockhart
  * @license   https://github.com/slimphp/Twig-View/blob/master/LICENSE.md (MIT License)
  */
@@ -105,7 +105,7 @@ class Twig implements \ArrayAccess
     {
         $data = array_merge($this->defaultVariables, $data);
 
-        return $this->environment->load($template)->renderBlock($block, $data);
+        return $this->environment->loadTemplate($template)->renderBlock($block, $data);
     }
 
     /**

@@ -2,30 +2,37 @@
 /**
  * Slim Framework (http://slimframework.com)
  *
- * @link      https://github.com/slimphp/Twig-View
+ * @link      https://github.com/Onethity/Twig-View
  * @copyright Copyright (c) 2011-2015 Josh Lockhart
  * @license   https://github.com/slimphp/Twig-View/blob/master/LICENSE.md (MIT License)
  */
 namespace Slim\Views;
 
-use Slim\Http\Uri;
+use Slim\Psr7\Uri;
+use Slim\Psr7\Factory\UriFactory;
 
 class TwigExtension extends \Twig\Extension\AbstractExtension
 {
     /**
-     * @var \Slim\Interfaces\RouterInterface
+     * @var \Slim\Interfaces\RouteParserInterface
      */
-    private $router;
+    private $routeParser;
 
     /**
-     * @var string|\Slim\Http\Uri
+     * @var string|\Psr\Http\Message\UriInterface
      */
     private $uri;
 
-    public function __construct($router, $uri)
+    /**
+     * @var string
+     */
+    private $basePath;
+
+    public function __construct($routeParser, $uri, $basePath)
     {
-        $this->router = $router;
+        $this->routeParser = $routeParser;
         $this->uri = $uri;
+        $this->basePath = $basePath;
     }
 
     public function getName()
@@ -46,7 +53,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension
 
     public function pathFor($name, $data = [], $queryParams = [], $appName = 'default')
     {
-        return $this->router->pathFor($name, $data, $queryParams);
+        return $this->routeParser->urlFor($name, $data, $queryParams);
     }
 
     /**
@@ -64,7 +71,8 @@ class TwigExtension extends \Twig\Extension\AbstractExtension
 
         /** @var Uri $uri */
         if (is_string($this->uri)) {
-            $uri = Uri::createFromString($this->uri);
+            $uriFactory = new UriFactory();
+            $uri = $uriFactory->createUri($this->uri);
         } else {
             $uri = $this->uri;
         }
@@ -82,15 +90,14 @@ class TwigExtension extends \Twig\Extension\AbstractExtension
     {
         if (is_string($this->uri)) {
             return $this->uri;
-        }
-        if (method_exists($this->uri, 'getBaseUrl')) {
-            return $this->uri->getBaseUrl();
+        } else {
+            return $this->getBaseUrl($this->uri);
         }
     }
 
     public function isCurrentPath($name, $data = [])
     {
-        return $this->router->pathFor($name, $data) === $this->uri->getBasePath() . '/' . ltrim($this->uri->getPath(), '/');
+        return $this->routeParser->urlFor($name, $data) === $this->basePath . '/' . ltrim($this->uri->getPath(), '/');
     }
 
     /**
@@ -105,7 +112,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension
             return $this->uri;
         }
 
-        $path = $this->uri->getBasePath() . '/' . ltrim($this->uri->getPath(), '/');
+        $path = $this->basePath . '/' . ltrim($this->uri->getPath(), '/');
 
         if ($withQueryString && '' !== $query = $this->uri->getQuery()) {
             $path .= '?' . $query;
@@ -117,11 +124,38 @@ class TwigExtension extends \Twig\Extension\AbstractExtension
     /**
      * Set the base url
      *
-     * @param string|Slim\Http\Uri $baseUrl
+     * @param string|Slim\Psr7\Uri $baseUrl
      * @return void
      */
     public function setBaseUrl($baseUrl)
     {
         $this->uri = $baseUrl;
+    }
+
+    /**
+     * Return the fully qualified base URL.
+     *
+     * Note that this method never includes a trailing /
+     *
+     * This method is not part of PSR-7.
+     * 
+     * It was a part of Slim 3.
+     *
+     * @var \Psr\Http\Message\UriInterface
+     * @return string
+     */
+    protected function getBaseUrl(\Psr\Http\Message\UriInterface $uri): String
+    {
+        $scheme = $uri->getScheme();
+        $authority = $uri->getAuthority();
+        $basePath = $this->basePath;
+
+        if ($authority !== '' && substr($basePath, 0, 1) !== '/') {
+            $basePath = $basePath . '/' . $basePath;
+        }
+
+        return ($scheme !== '' ? $scheme . ':' : '')
+            . ($authority ? '//' . $authority : '')
+            . rtrim($basePath, '/');
     }
 }
