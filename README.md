@@ -1,4 +1,4 @@
-# Slim Framework Twig View
+# Slim 4 Framework Twig View
 
 This is a [slim/twig-view](https://github.com/slimphp/Twig-View) component, but forked for Slim 4.
 
