@@ -1,6 +1,6 @@
 # Slim Framework Twig View
 
-This is a slim/twig-view component for Slim 4.
+This is a [slim/twig-view](https://github.com/slimphp/Twig-View) component, but forked for Slim 4.
 
 ## Install
 
@@ -80,7 +80,7 @@ You can use `path_for` to generate complete URLs to any Slim application named r
         <li><a href="{{ path_for('profile', { 'name': 'andrew' }) }}">Andrew</a></li>
     </ul>
     {% endblock %}
-    
+
 
 ## Credits
 
