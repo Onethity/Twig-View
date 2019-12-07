@@ -1,52 +1,53 @@
 # Slim Framework Twig View
 
-[![Build Status](https://travis-ci.org/slimphp/Twig-View.svg?branch=master)](https://travis-ci.org/slimphp/Twig-View)
-
-This is a Slim Framework view helper built on top of the Twig templating component. You can use this component to create and render templates in your Slim Framework application. It works with Twig 1.18+ (PHP5.5+) and with Twig 2 (PHP7).
+This is a slim/twig-view component for Slim 4.
 
 ## Install
 
 Via [Composer](https://getcomposer.org/)
 
 ```bash
-$ composer require slim/twig-view
+$ composer require Onethity/slim4-twig-view
 ```
 
-Requires Slim Framework 3 and PHP 5.5.0 or newer.
+Requires Slim Framework 4 and PHP 7.1.0 or newer.
 
 ## Usage
 
 ```php
-// Create Slim app
-$app = new \Slim\App();
+// Create Container
+$container = new Container();
 
-// Fetch DI Container
-$container = $app->getContainer();
+// Set container to create App with on AppFactory
+AppFactory::setContainer($container);
+$app = AppFactory::create();
 
 // Register Twig View helper
-$container['view'] = function ($c) {
-    $view = new \Slim\Views\Twig('path/to/templates', [
-        'cache' => 'path/to/cache'
+$container->set('view', function ( ) use ($app) {
+    $view = new \Slim\Views\Twig(__DIR__ . '/../tpl/', [
+        'cache' => false,
     ]);
     
     // Instantiate and add Slim specific extension
-    $router = $c->get('router');
-    $uri = \Slim\Http\Uri::createFromEnvironment(new \Slim\Http\Environment($_SERVER));
-    $view->addExtension(new \Slim\Views\TwigExtension($router, $uri));
+    $uriFactory = new \Slim\Psr7\Factory\UriFactory();
+    $uri = $uriFactory->createFromGlobals($_SERVER);
+    $routeParser = $app->getRouteCollector()->getRouteParser();
+    $basePath = $app->getBasePath();
+    $view->addExtension(new \Slim\Views\TwigExtension($routeParser, $uri, $basePath));
 
     return $view;
-};
+});
 
 // Define named route
 $app->get('/hello/{name}', function ($request, $response, $args) {
-    return $this->view->render($response, 'profile.html', [
+    return $this->get('view')->render($response, 'index.html.twig', [
         'name' => $args['name']
     ]);
 })->setName('profile');
 
 // Render from string
 $app->get('/hi/{name}', function ($request, $response, $args) {
-    $str = $this->view->fetchFromString('<p>Hi, my name is {{ name }}.</p>', [
+    $str = $this->get('view')->fetchFromString('<p>Hi, my name is {{ name }}.</p>', [
         'name' => $args['name']
     ]);
     $response->getBody()->write($str);
@@ -56,6 +57,7 @@ $app->get('/hi/{name}', function ($request, $response, $args) {
 // Run app
 $app->run();
 ```
+
 
 ## Custom template functions
 
@@ -78,21 +80,7 @@ You can use `path_for` to generate complete URLs to any Slim application named r
         <li><a href="{{ path_for('profile', { 'name': 'andrew' }) }}">Andrew</a></li>
     </ul>
     {% endblock %}
-
-
-## Testing
-
-```bash
-phpunit
-```
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security
-
-If you discover any security related issues, please email security@slimframework.com instead of using the issue tracker.
+    
 
 ## Credits
 
