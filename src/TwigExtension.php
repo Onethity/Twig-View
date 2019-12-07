@@ -144,6 +144,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension
      * @var \Psr\Http\Message\UriInterface
      * @return string
      */
+    
     protected function getBaseUrl(\Psr\Http\Message\UriInterface $uri): String
     {
         $scheme = $uri->getScheme();
